@@ -1,0 +1,63 @@
+import colorama
+from colorama import Fore, Back, Style
+def build_graph_weighted(file):
+    """Builds a weighted, undirected graph"""
+    graph = {}
+    for line in file:
+        v1, v2, w = line.split(',')
+        v1, v2 = v1.strip(), v2.strip()
+        w = int(w.strip())
+        if v1 not in graph:
+            graph[v1] = []
+        if v2 not in graph:
+            graph[v2] = []
+        graph[v1].append((v2,w))
+        graph[v2].append((v1,w))
+    return graph
+# Helper methods for A*
+def build_heuristic_dict():
+    h = {}
+    with open("sld_to_bucharest.txt", 'r') as file:
+        for line in file:
+            line = line.strip().split(",")
+            node = line[0].strip()
+            sld = int(line[1].strip())
+            h[node] = sld
+    return h
+def heuristic(node, values):
+    return values[node]
+# A* search
+
+def a_star(graph, start, dest,pred, path=[], visited=[]):
+    visited.append(start)
+    min = ("", 40000)
+    for child in graph[start]:
+        #print(child, min)
+        #print(child[1]+pred[child[0]])
+        if child[1]+pred[child[0]] < min[1]+pred[min[0]] and not child[0] in visited:
+            min = child
+            #print(child[1]+pred[child[0]])
+
+    path.append(min)
+    # recall a star with min as start city
+    if start == dest:
+        return path
+    return a_star(graph, min[0], dest,pred, path, visited)
+
+with open('graph.txt', 'r') as file:
+    lines = file.readlines()
+
+start = lines[1].strip()
+dest = lines[2].strip()
+graph = build_graph_weighted(lines[4:])
+print(type(build_heuristic_dict()))
+prediction=build_heuristic_dict()
+#print(build_heuristic_dict())
+#print(graph)
+
+print("***Finally the best path***")
+print(a_star(graph, start, dest,prediction))
+#print(prediction['Arad'])
+#print(graph)
+
+
